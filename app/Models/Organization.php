@@ -14,4 +14,8 @@ class Organization extends Model
         'slug',
     ];
 
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }
