@@ -32,9 +32,7 @@ class AuthController extends Controller
 
     public function me()
     {
-        return response()->json(
-            Auth::user()->load('organization')
-        );
+        return new UserResource($this->authService->me());
     }
 
     public function refresh()
