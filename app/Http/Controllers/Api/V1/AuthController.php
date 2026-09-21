@@ -2,27 +2,32 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTOs\Auth\LoginDTO;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Api\V1\Auth\LoginRequest;
+use App\Http\Resources\AuthResource;
+use App\Http\Resources\UserResource;
+use App\Services\AuthService;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
-    {
-         $credentials = $request->only(['email', 'password']);
+    public function __construct(
+        private AuthService $authService
+    ) {}
 
-        if (!$token = Auth::attempt($credentials)) {
+    public function login(LoginRequest $request)
+    {
+        $result = $this->authService->login(
+            LoginDTO::fromRequest($request)
+        );
+
+        if (!$result) {
             return response()->json([
                 'message' => 'Invalid credentials.',
             ], 401);
         }
 
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => Auth::factory()->getTTL() * 60,
-        ]);
+        return new AuthResource($result);
     }
 
     public function me()
@@ -34,16 +39,12 @@ class AuthController extends Controller
 
     public function refresh()
     {
-        return response()->json([
-            'access_token' => Auth::refresh(),
-            'token_type' => 'bearer',
-            'expires_in' => Auth::factory()->getTTL() * 60,
-        ]);
+        return new AuthResource($this->authService->refresh());
     }
 
     public function logout()
     {
-        Auth::logout();
+        $this->authService->logout();
 
         return response()->json([
             'message' => 'Successfully logged out.',
