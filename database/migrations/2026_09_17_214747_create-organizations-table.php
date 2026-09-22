@@ -12,7 +12,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name', 150);
             $table->string('slug', 150)->unique();
-            $table->timestampsTz();
+            $table->timestamps();
         });
     }
 

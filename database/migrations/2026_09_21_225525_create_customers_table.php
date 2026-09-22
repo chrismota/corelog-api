@@ -23,7 +23,9 @@ return new class extends Migration
             $table->string('email');
             $table->string('phone', 20);
 
-            $table->timestampsTz();
+            $table->softDeletes();
+
+            $table->timestamps();
 
             $table->unique([
                 'organization_id',
