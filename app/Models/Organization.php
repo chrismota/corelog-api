@@ -20,6 +20,11 @@ class Organization extends Model
         return $this->hasMany(User::class);
     }
 
+    public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Organization $organization) {
