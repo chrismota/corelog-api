@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -17,5 +18,7 @@ Route::prefix('v1')->group(function () {
         Route::post('customers', [CustomerController::class, 'store']);
         Route::put('customers/{customerId}', [CustomerController::class, 'update']);
         Route::delete('customers/{customerId}', [CustomerController::class, 'destroy']);
+
+        Route::post('/orders', [OrderController::class, 'store']);
     });
 });
