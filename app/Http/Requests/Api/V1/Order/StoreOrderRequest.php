@@ -48,18 +48,21 @@ class StoreOrderRequest extends FormRequest
                 'required',
                 'numeric',
                 'min:0',
+                'decimal:0,2',
             ],
 
             'shipping_cost' => [
                 'required',
                 'numeric',
                 'min:0',
+                'decimal:0,2',
             ],
 
             'discount' => [
                 'required',
                 'numeric',
                 'min:0',
+                'decimal:0,2',
             ],
         ];
     }
