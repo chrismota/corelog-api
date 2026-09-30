@@ -7,7 +7,7 @@ use App\DTOs\Customer\UpdateCustomerDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Customer\StoreCustomerRequest;
 use App\Http\Requests\Api\V1\Customer\UpdateCustomerRequest;
-use App\Http\Resources\CustomerResource;
+use App\Http\Resources\Api\V1\CustomerResource;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 
