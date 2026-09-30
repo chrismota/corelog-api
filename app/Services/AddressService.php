@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Contexts\OrganizationContext;
-use App\DTOs\Address\AddressDTO;
+use App\DTOs\Address\CreateAddressDTO;
 use App\DTOs\Address\UpdateAddressDTO;
 use App\Models\Address;
 use App\Models\Customer;
@@ -56,7 +56,7 @@ class AddressService
 
     public function create(
         Customer $customer,
-        AddressDTO $dto,
+        CreateAddressDTO $dto,
     ): Address {
         $organizationId = $this->organizationContext->id();
 
