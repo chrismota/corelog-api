@@ -44,7 +44,7 @@ class OrderService
                 ]);
             }
 
-            $subtotal = '0.00';
+            $subtotal = 0.00;
 
             foreach ($dto->items as $item) {
                 $itemTotal = round($item->unitPrice * $item->quantity, 2);
@@ -53,6 +53,12 @@ class OrderService
             }
 
             $total = round($subtotal + $dto->shippingCost - $dto->discount, 2);
+
+            if ($total < 0) {
+                throw ValidationException::withMessages([
+                    'discount' => 'O desconto não pode ser maior que o valor do pedido.',
+                ]);
+            }
 
             $order = Order::create([
                 'organization_id' => $organizationId,
