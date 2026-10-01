@@ -7,6 +7,7 @@ use App\DTOs\Order\CreateOrderDTO;
 use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -18,6 +19,41 @@ class OrderService
     public function __construct(
         private readonly OrganizationContext $organizationContext
     ){}
+
+    public function list(): Collection
+    {
+        $organizationId = $this->organizationContext->id();
+
+        return Order::query()
+            ->where('organization_id', $organizationId)
+            ->with([
+                'customer',
+                'items',
+            ])
+            ->latest()
+            ->get();
+    }
+
+    public function show(string $orderId): Order
+    {
+        $organizationId = $this->organizationContext->id();
+
+        $order = Order::query()
+            ->where('organization_id', $organizationId)
+            ->with([
+                'customer',
+                'items',
+            ])
+            ->find($orderId);
+
+        if (!$order) {
+            throw ValidationException::withMessages([
+                'order' => 'Pedido não encontrado.',
+            ]);
+        }
+
+        return $order;
+    }
 
      public function create(CreateOrderDTO $dto): Order
     {

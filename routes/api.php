@@ -26,7 +26,8 @@ Route::prefix('v1')->group(function () {
         Route::put('/customers/{customer}/addresses/{address}',[AddressController::class, 'update']);
         Route::delete('/customers/{customer}/addresses/{address}', [AddressController::class, 'destroy']);
 
-
+        Route::get('/orders', [OrderController::class, 'index']);
+        Route::get('/orders/{order}', [OrderController::class, 'show']);
         Route::post('/orders', [OrderController::class, 'store']);
     });
 });
