@@ -37,10 +37,13 @@ enum ShipmentStatus: string
             self::OUT_FOR_DELIVERY => in_array($status, [
                 self::DELIVERED,
                 self::DELIVERY_PROBLEM,
+                self::CANCELLED,
             ], true),
 
             self::DELAYED => in_array($status, [
                 self::IN_TRANSIT,
+                self::DELIVERY_PROBLEM,
+                self::RETURNED,
                 self::CANCELLED,
             ], true),
 
