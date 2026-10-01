@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contexts\OrganizationContext;
 use App\DTOs\Order\CreateOrderDTO;
+use App\DTOs\Order\UpdateOrderStatusDTO;
 use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
@@ -135,6 +136,37 @@ class OrderService
                 'items',
             ]);
         });
+    }
+
+    public function updateStatus(string $orderId, UpdateOrderStatusDTO $dto): Order
+    {
+        $organizationId = $this->organizationContext->id();
+
+        $order = Order::query()
+            ->where('organization_id', $organizationId)
+            ->find($orderId);
+
+        if (!$order) {
+            throw ValidationException::withMessages([
+                'order' => 'Pedido não encontrado.',
+            ]);
+        }
+
+        if (!$order->status->canTransitionTo($dto->status)) {
+            throw ValidationException::withMessages([
+                'status' => 'Não é possível alterar o pedido de '
+                    . $order->status->value
+                    . ' para '
+                    . $dto->status->value
+                    . '.',
+            ]);
+        }
+
+        $order->update([
+            'status' => $dto->status,
+        ]);
+
+        return $order->refresh();
     }
 
     private function generateOrderNumber(): string
