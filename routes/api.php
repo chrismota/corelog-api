@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AddressController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\DeliveryServiceController;
 use App\Http\Controllers\Api\V1\OrderController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,5 +31,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         Route::post('/orders', [OrderController::class, 'store']);
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+
+        Route::get('/delivery-services', [DeliveryServiceController::class, 'index']);
+        Route::post('/delivery-services', [DeliveryServiceController::class, 'store']);
     });
 });
