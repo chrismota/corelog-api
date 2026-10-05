@@ -152,6 +152,18 @@ class OrderService
             ]);
         }
 
+        if ($dto->status === OrderStatus::SHIPPED) {
+            throw ValidationException::withMessages([
+                'status' => 'O pedido deve ser enviado através da sua remessa.',
+            ]);
+        }
+
+        if ($dto->status === OrderStatus::COMPLETED) {
+            throw ValidationException::withMessages([
+                'status' => 'O pedido é concluído automaticamente quando a remessa é entregue.',
+            ]);
+        }
+
         if (!$order->status->canTransitionTo($dto->status)) {
             throw ValidationException::withMessages([
                 'status' => 'Não é possível alterar o pedido de '
