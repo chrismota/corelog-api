@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\DeliveryServiceController;
 use App\Http\Controllers\Api\V1\OrderController;
+use App\Http\Controllers\Api\V1\ShipmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -34,5 +35,8 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/delivery-services', [DeliveryServiceController::class, 'index']);
         Route::post('/delivery-services', [DeliveryServiceController::class, 'store']);
+
+        Route::post('/shipments', [ShipmentController::class, 'store']);
+        Route::patch('/shipments/{shipment}/status', [ShipmentController::class, 'updateStatus']);
     });
 });
