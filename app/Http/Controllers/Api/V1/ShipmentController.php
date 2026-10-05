@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\DTOs\Shipment\CreateShipmentDTO;
+use App\DTOs\Shipment\UpdateShipmentStatusDTO;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Shipment\StoreShipmentRequest;
+use App\Http\Requests\Api\V1\Shipment\UpdateShipmentStatusRequest;
+use App\Http\Resources\Api\V1\ShipmentResource;
+use App\Services\ShipmentService;
+
+class ShipmentController extends Controller
+{
+    public function __construct(
+        private readonly ShipmentService $shipmentService,
+    ) {
+    }
+
+    public function store(StoreShipmentRequest $request): ShipmentResource
+    {
+        $shipment = $this->shipmentService->create(
+            CreateShipmentDTO::fromRequest($request),
+        );
+
+        return new ShipmentResource($shipment);
+    }
+
+    public function updateStatus(UpdateShipmentStatusRequest $request, string $shipment): ShipmentResource
+    {
+        $shipmentModel = $this->shipmentService->updateStatus(
+            $shipment,
+            UpdateShipmentStatusDTO::fromRequest($request),
+        );
+
+        return new ShipmentResource($shipmentModel);
+    }
+}
