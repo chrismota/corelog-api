@@ -129,6 +129,12 @@ class ShipmentService
                 'occurred_at' => $dto->occurredAt ?? $now,
             ]);
 
+            if ($dto->status === ShipmentStatus::POSTED) {
+                $shipment->order->update([
+                    'status' => OrderStatus::SHIPPED,
+                ]);
+            }
+
             if ($dto->status === ShipmentStatus::DELIVERED) {
                 $shipment->order->update([
                     'status' => OrderStatus::COMPLETED,
