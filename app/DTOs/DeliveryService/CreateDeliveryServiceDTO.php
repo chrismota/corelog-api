@@ -4,7 +4,7 @@ namespace App\DTOs\DeliveryService;
 
 use App\Http\Requests\Api\V1\DeliveryService\StoreDeliveryServiceRequest;
 
-class DeliveryServiceDTO
+class CreateDeliveryServiceDTO
 {
     public function __construct(
         public readonly string $name,
