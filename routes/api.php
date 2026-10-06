@@ -34,7 +34,9 @@ Route::prefix('v1')->group(function () {
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
 
         Route::get('/delivery-services', [DeliveryServiceController::class, 'index']);
+        Route::get('/delivery-services/{deliveryService}', [DeliveryServiceController::class, 'show']);
         Route::post('/delivery-services', [DeliveryServiceController::class, 'store']);
+        Route::put('/delivery-services/{deliveryService}', [DeliveryServiceController::class, 'update']);
 
         Route::get('/shipments', [ShipmentController::class, 'index']);
         Route::get('/shipments/{shipment}', [ShipmentController::class, 'show']);
