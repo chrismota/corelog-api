@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Shipment\StoreShipmentRequest;
 use App\Http\Requests\Api\V1\Shipment\UpdateShipmentStatusRequest;
 use App\Http\Resources\Api\V1\ShipmentResource;
+use Illuminate\Http\Resources\Json\ResourceCollection as ShipmentResourceCollection;
 use App\Services\ShipmentService;
 
 class ShipmentController extends Controller
@@ -15,6 +16,20 @@ class ShipmentController extends Controller
     public function __construct(
         private readonly ShipmentService $shipmentService,
     ) {
+    }
+
+    public function index(): ShipmentResourceCollection
+    {
+        $shipments = $this->shipmentService->list();
+
+        return ShipmentResource::collection($shipments);
+    }
+
+    public function show(string $shipment): ShipmentResource
+    {
+        $shipmentModel = $this->shipmentService->show($shipment);
+
+        return new ShipmentResource($shipmentModel);
     }
 
     public function store(StoreShipmentRequest $request): ShipmentResource

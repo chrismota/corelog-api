@@ -10,6 +10,7 @@ use App\Enums\ShipmentStatus;
 use App\Models\DeliveryService;
 use App\Models\Order;
 use App\Models\Shipment;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -18,6 +19,46 @@ class ShipmentService
     public function __construct(
         private readonly OrganizationContext $organizationContext,
     ) {
+    }
+
+    public function list(): Collection
+    {
+        $organizationId = $this->organizationContext->id();
+
+        return Shipment::query()
+            ->whereHas('order', function ($query) use ($organizationId) {
+                $query->where('organization_id', $organizationId);
+            })
+            ->with([
+                'order',
+                'deliveryService',
+            ])
+            ->latest()
+            ->get();
+    }
+
+    public function show(string $shipmentId): Shipment
+    {
+        $organizationId = $this->organizationContext->id();
+
+        $shipment = Shipment::query()
+            ->whereHas('order', function ($query) use ($organizationId) {
+                $query->where('organization_id', $organizationId);
+            })
+            ->with([
+                'order',
+                'deliveryService',
+                'trackingEvents',
+            ])
+            ->find($shipmentId);
+
+        if (!$shipment) {
+            throw ValidationException::withMessages([
+                'shipment' => 'Remessa não encontrada.',
+            ]);
+        }
+
+        return $shipment;
     }
 
     public function create(CreateShipmentDTO $dto): Shipment
