@@ -15,6 +15,7 @@ class TrackingEventResource extends JsonResource
             'description' => $this->description,
             'location' => $this->location,
             'occurred_at' => $this->occurred_at,
+            'created_at' => $this->created_at,
         ];
     }
 }
