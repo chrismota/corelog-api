@@ -10,7 +10,7 @@ use App\Enums\ShipmentStatus;
 use App\Models\DeliveryService;
 use App\Models\Order;
 use App\Models\Shipment;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -21,7 +21,7 @@ class ShipmentService
     ) {
     }
 
-    public function list(): Collection
+    public function list(): LengthAwarePaginator
     {
         $organizationId = $this->organizationContext->id();
 
@@ -34,7 +34,7 @@ class ShipmentService
                 'deliveryService',
             ])
             ->latest()
-            ->get();
+            ->paginate(15);
     }
 
     public function show(string $shipmentId): Shipment

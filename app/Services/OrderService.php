@@ -8,7 +8,7 @@ use App\DTOs\Order\UpdateOrderStatusDTO;
 use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -21,7 +21,7 @@ class OrderService
         private readonly OrganizationContext $organizationContext
     ){}
 
-    public function list(): Collection
+    public function list(): LengthAwarePaginator
     {
         $organizationId = $this->organizationContext->id();
 
@@ -32,7 +32,7 @@ class OrderService
                 'items',
             ])
             ->latest()
-            ->get();
+            ->paginate(15);
     }
 
     public function show(string $orderId): Order
@@ -140,43 +140,45 @@ class OrderService
 
     public function updateStatus(string $orderId, UpdateOrderStatusDTO $dto): Order
     {
-        $organizationId = $this->organizationContext->id();
+        return DB::transaction(function () use ($orderId, $dto) {
+            $organizationId = $this->organizationContext->id();
 
-        $order = Order::query()
-            ->where('organization_id', $organizationId)
-            ->find($orderId);
+            $order = Order::query()
+                ->where('organization_id', $organizationId)
+                ->find($orderId);
 
-        if (!$order) {
-            throw ValidationException::withMessages([
-                'order' => 'Pedido não encontrado.',
+            if (!$order) {
+                throw ValidationException::withMessages([
+                    'order' => 'Pedido não encontrado.',
+                ]);
+            }
+
+            if ($dto->status === OrderStatus::SHIPPED) {
+                throw ValidationException::withMessages([
+                    'status' => 'O pedido deve ser enviado através da sua remessa.',
+                ]);
+            }
+
+            if ($dto->status === OrderStatus::COMPLETED) {
+                throw ValidationException::withMessages([
+                    'status' => 'O pedido é concluído automaticamente quando a remessa é entregue.',
+                ]);
+            }
+
+            if (!$order->status->canTransitionTo($dto->status)) {
+                throw ValidationException::withMessages([
+                    'status' => 'Não é possível alterar o pedido de '
+                        . $order->status->value
+                        . ' para '
+                        . $dto->status->value
+                        . '.',
+                ]);
+            }
+
+            $order->update([
+                'status' => $dto->status,
             ]);
-        }
-
-        if ($dto->status === OrderStatus::SHIPPED) {
-            throw ValidationException::withMessages([
-                'status' => 'O pedido deve ser enviado através da sua remessa.',
-            ]);
-        }
-
-        if ($dto->status === OrderStatus::COMPLETED) {
-            throw ValidationException::withMessages([
-                'status' => 'O pedido é concluído automaticamente quando a remessa é entregue.',
-            ]);
-        }
-
-        if (!$order->status->canTransitionTo($dto->status)) {
-            throw ValidationException::withMessages([
-                'status' => 'Não é possível alterar o pedido de '
-                    . $order->status->value
-                    . ' para '
-                    . $dto->status->value
-                    . '.',
-            ]);
-        }
-
-        $order->update([
-            'status' => $dto->status,
-        ]);
+        });
 
         return $order->refresh();
     }
