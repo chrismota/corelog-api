@@ -7,6 +7,7 @@ use App\DTOs\Customer\CreateCustomerDTO;
 use App\DTOs\Customer\UpdateCustomerDTO;
 use App\Models\Customer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\ValidationException;
 
 class CustomerService
 {
@@ -27,9 +28,17 @@ class CustomerService
 
     public function show(string $customerId): Customer
     {
-        return Customer::query()
+        $customer = Customer::query()
             ->where('organization_id', $this->organizationContext->id())
-            ->findOrFail($customerId);
+            ->find($customerId);
+
+        if (!$customer) {
+            throw ValidationException::withMessages([
+                'customer' => 'Cliente nao encontrado.',
+            ]);
+        }
+
+        return $customer;
     }
 
     public function create(CreateCustomerDTO $dto): Customer
