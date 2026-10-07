@@ -44,6 +44,7 @@ class Shipment extends Model
 
     public function trackingEvents(): HasMany
     {
-        return $this->hasMany(TrackingEvent::class);
+        return $this->hasMany(TrackingEvent::class)
+            ->orderBy('occurred_at');
     }
 }
