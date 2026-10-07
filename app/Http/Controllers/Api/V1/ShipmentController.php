@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\DTOs\Shipment\CreateShipmentDTO;
+use App\DTOs\Shipment\IndexShipmentDTO;
 use App\DTOs\Shipment\UpdateShipmentStatusDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Shipment\IndexShipmentRequest;
 use App\Http\Requests\Api\V1\Shipment\StoreShipmentRequest;
 use App\Http\Requests\Api\V1\Shipment\UpdateShipmentStatusRequest;
 use App\Http\Resources\Api\V1\ShipmentResource;
@@ -18,9 +20,11 @@ class ShipmentController extends Controller
     ) {
     }
 
-    public function index(): ShipmentResourceCollection
+    public function index(IndexShipmentRequest $request): ShipmentResourceCollection
     {
-        $shipments = $this->shipmentService->list();
+        $shipments = $this->shipmentService->list(
+            IndexShipmentDTO::fromRequest($request),
+        );
 
         return ShipmentResource::collection($shipments);
     }

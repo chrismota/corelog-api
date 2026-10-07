@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contexts\OrganizationContext;
 use App\DTOs\Shipment\CreateShipmentDTO;
+use App\DTOs\Shipment\IndexShipmentDTO;
 use App\DTOs\Shipment\UpdateShipmentStatusDTO;
 use App\Enums\OrderStatus;
 use App\Enums\ShipmentStatus;
@@ -21,18 +22,52 @@ class ShipmentService
     ) {
     }
 
-    public function list(): LengthAwarePaginator
+    public function list(IndexShipmentDTO $dto): LengthAwarePaginator
     {
         $organizationId = $this->organizationContext->id();
 
-        return Shipment::query()
+        $query = Shipment::query()
             ->whereHas('order', function ($query) use ($organizationId) {
                 $query->where('organization_id', $organizationId);
             })
             ->with([
                 'order',
                 'deliveryService',
-            ])
+            ]);
+
+        if ($dto->status !== null) {
+            $query->where('status', $dto->status);
+        }
+
+        if ($dto->trackingCode !== null) {
+            $query->where('tracking_code', $dto->trackingCode);
+        }
+
+        if ($dto->deliveryServiceId !== null) {
+            $query->where('delivery_service_id', $dto->deliveryServiceId);
+        }
+
+        if ($dto->orderId !== null) {
+            $query->where('order_id', $dto->orderId);
+        }
+
+        if ($dto->shippedFrom !== null) {
+            $query->whereDate('shipped_at', '>=', $dto->shippedFrom);
+        }
+
+        if ($dto->shippedTo !== null) {
+            $query->whereDate('shipped_at', '<=', $dto->shippedTo);
+        }
+
+        if ($dto->deliveredFrom !== null) {
+            $query->whereDate('delivered_at', '>=', $dto->deliveredFrom);
+        }
+
+        if ($dto->deliveredTo !== null) {
+            $query->whereDate('delivered_at', '<=', $dto->deliveredTo);
+        }
+
+        return $query
             ->latest()
             ->paginate(15);
     }
