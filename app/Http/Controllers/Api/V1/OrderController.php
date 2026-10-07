@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\DTOs\Order\CreateOrderDTO;
+use App\DTOs\Order\IndexOrderDTO;
 use App\DTOs\Order\UpdateOrderStatusDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Order\IndexOrderRequest;
 use App\Http\Requests\Api\V1\Order\StoreOrderRequest;
 use App\Http\Requests\Api\V1\Order\UpdateOrderStatusRequest;
 use App\Http\Resources\Api\V1\OrderResource;
@@ -17,9 +19,11 @@ class OrderController extends Controller
         private OrderService $orderService
     ) {}
 
-    public function index(): OrderResourceCollection
+    public function index(IndexOrderRequest $request): OrderResourceCollection
     {
-        $orders = $this->orderService->list();
+        $orders = $this->orderService->list(
+            IndexOrderDTO::fromRequest($request)
+        );
 
         return OrderResource::collection($orders);
     }

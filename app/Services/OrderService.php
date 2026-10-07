@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contexts\OrganizationContext;
 use App\DTOs\Order\CreateOrderDTO;
+use App\DTOs\Order\IndexOrderDTO;
 use App\DTOs\Order\UpdateOrderStatusDTO;
 use App\Enums\OrderStatus;
 use App\Models\Customer;
@@ -21,16 +22,38 @@ class OrderService
         private readonly OrganizationContext $organizationContext
     ){}
 
-    public function list(): LengthAwarePaginator
+    public function list(IndexOrderDTO $dto): LengthAwarePaginator
     {
         $organizationId = $this->organizationContext->id();
 
-        return Order::query()
+        $query = Order::query()
             ->where('organization_id', $organizationId)
             ->with([
                 'customer',
                 'items',
-            ])
+            ]);
+
+        if($dto->status !== null) {
+            $query->where('status', $dto->status);
+        }
+
+        if($dto->orderNumber !== null) {
+            $query->where('order_number', $dto->orderNumber);
+        }
+
+        if($dto->customerId !== null) {
+            $query->where('customer_id', $dto->customerId);
+        }
+
+        if($dto->dateFrom !== null) {
+            $query->where('created_at', '>=', $dto->dateFrom);
+        }
+
+        if($dto->dateTo !== null) {
+            $query->where('created_at', '<=', $dto->dateTo);
+        }
+
+        return $query
             ->latest()
             ->paginate(15);
     }
