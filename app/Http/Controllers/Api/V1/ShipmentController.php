@@ -29,11 +29,13 @@ class ShipmentController extends Controller
         return ShipmentResource::collection($shipments);
     }
 
-    public function show(string $shipment): ShipmentResource
+    public function show(Shipment $shipment): ShipmentResource
     {
-        $shipmentModel = $this->shipmentService->show($shipment);
+        $this->authorize('view', $shipment);
 
-        return new ShipmentResource($shipmentModel);
+        $shipment = $this->shipmentService->show($shipment);
+
+        return new ShipmentResource($shipment);
     }
 
     public function store(StoreShipmentRequest $request): ShipmentResource
@@ -45,13 +47,15 @@ class ShipmentController extends Controller
         return new ShipmentResource($shipment);
     }
 
-    public function updateStatus(UpdateShipmentStatusRequest $request, string $shipment): ShipmentResource
+    public function updateStatus(UpdateShipmentStatusRequest $request, Shipment $shipment): ShipmentResource
     {
-        $shipmentModel = $this->shipmentService->updateStatus(
+        $this->authorize('updateStatus', $shipment);
+
+        $shipment = $this->shipmentService->updateStatus(
             $shipment,
             UpdateShipmentStatusDTO::fromRequest($request),
         );
 
-        return new ShipmentResource($shipmentModel);
+        return new ShipmentResource($shipment);
     }
 }

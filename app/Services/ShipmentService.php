@@ -72,28 +72,13 @@ class ShipmentService
             ->paginate(15);
     }
 
-    public function show(string $shipmentId): Shipment
+    public function show(Shipment $shipment): Shipment
     {
-        $organizationId = $this->organizationContext->id();
-
-        $shipment = Shipment::query()
-            ->whereHas('order', function ($query) use ($organizationId) {
-                $query->where('organization_id', $organizationId);
-            })
-            ->with([
-                'order',
-                'deliveryService',
-                'trackingEvents',
-            ])
-            ->find($shipmentId);
-
-        if (!$shipment) {
-            throw ValidationException::withMessages([
-                'shipment' => 'Remessa não encontrada.',
-            ]);
-        }
-
-        return $shipment;
+        return $shipment->load([
+            'order',
+            'deliveryService',
+            'trackingEvents',
+        ]);
     }
 
     public function create(CreateShipmentDTO $dto): Shipment
@@ -156,24 +141,9 @@ class ShipmentService
         });
     }
 
-    public function updateStatus(string $shipmentId, UpdateShipmentStatusDTO $dto): Shipment
+    public function updateStatus(Shipment $shipment, UpdateShipmentStatusDTO $dto): Shipment
     {
-        return DB::transaction(function () use ($shipmentId, $dto) {
-            $organizationId = $this->organizationContext->id();
-
-            $shipment = Shipment::query()
-                ->whereHas('order', function ($query) use ($organizationId) {
-                    $query->where('organization_id', $organizationId);
-                })
-                ->with('order')
-                ->find($shipmentId);
-
-            if (!$shipment) {
-                throw ValidationException::withMessages([
-                    'shipment' => 'Remessa não encontrada.',
-                ]);
-            }
-
+        return DB::transaction(function () use ($shipment, $dto) {
             if (!$shipment->status->canTransitionTo($dto->status)) {
                 throw ValidationException::withMessages([
                     'status' => 'Não é possível alterar a remessa de '
