@@ -10,6 +10,7 @@ use App\Http\Requests\Api\V1\Order\IndexOrderRequest;
 use App\Http\Requests\Api\V1\Order\StoreOrderRequest;
 use App\Http\Requests\Api\V1\Order\UpdateOrderStatusRequest;
 use App\Http\Resources\Api\V1\OrderResource;
+use App\Models\Order;
 use Illuminate\Http\Resources\Json\ResourceCollection as OrderResourceCollection;
 use App\Services\OrderService;
 
@@ -28,11 +29,13 @@ class OrderController extends Controller
         return OrderResource::collection($orders);
     }
 
-    public function show(string $order): OrderResource
+    public function show(Order $order): OrderResource
     {
-        $orderModel = $this->orderService->show($order);
+        $this->authorize('view', $order);
 
-        return new OrderResource($orderModel);
+        $order = $this->orderService->show($order);
+
+        return new OrderResource($order);
     }
 
     public function store(StoreOrderRequest $request)
@@ -44,13 +47,15 @@ class OrderController extends Controller
         return new OrderResource($order);
     }
 
-    public function updateStatus(UpdateOrderStatusRequest $request,string $order): OrderResource
+    public function updateStatus(UpdateOrderStatusRequest $request, Order $order): OrderResource
     {
-        $orderModel = $this->orderService->updateStatus(
+        $this->authorize('updateStatus', $order);
+
+        $order = $this->orderService->updateStatus(
             $order,
             UpdateOrderStatusDTO::fromRequest($request),
         );
 
-        return new OrderResource($orderModel);
+        return new OrderResource($order);
     }
 }

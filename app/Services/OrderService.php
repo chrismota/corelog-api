@@ -58,25 +58,12 @@ class OrderService
             ->paginate(15);
     }
 
-    public function show(string $orderId): Order
+    public function show(Order $order): Order
     {
-        $organizationId = $this->organizationContext->id();
-
-        $order = Order::query()
-            ->where('organization_id', $organizationId)
-            ->with([
-                'customer',
-                'items',
-            ])
-            ->find($orderId);
-
-        if (!$order) {
-            throw ValidationException::withMessages([
-                'order' => 'Pedido não encontrado.',
-            ]);
-        }
-
-        return $order;
+        return $order->load([
+            'customer',
+            'items',
+        ]);
     }
 
      public function create(CreateOrderDTO $dto): Order
@@ -161,15 +148,9 @@ class OrderService
         });
     }
 
-    public function updateStatus(string $orderId, UpdateOrderStatusDTO $dto): Order
+    public function updateStatus(Order $order, UpdateOrderStatusDTO $dto): Order
     {
-        return DB::transaction(function () use ($orderId, $dto) {
-            $organizationId = $this->organizationContext->id();
-
-            $order = Order::query()
-                ->where('organization_id', $organizationId)
-                ->find($orderId);
-
+        return DB::transaction(function () use ($order, $dto) {
             if (!$order) {
                 throw ValidationException::withMessages([
                     'order' => 'Pedido não encontrado.',
