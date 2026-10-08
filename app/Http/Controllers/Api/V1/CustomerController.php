@@ -19,6 +19,8 @@ class CustomerController extends Controller
 
     public function index()
     {
+        $this->authorize('viewAny', Customer::class);
+
         return CustomerResource::collection(
             $this->customerService->index()
         );
@@ -33,6 +35,8 @@ class CustomerController extends Controller
 
     public function store(StoreCustomerRequest $request)
     {
+        $this->authorize('create', Customer::class);
+
         $customer = $this->customerService->create(
             CreateCustomerDTO::fromRequest($request)
         );

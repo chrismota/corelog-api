@@ -22,6 +22,8 @@ class AddressController extends Controller
 
     public function index(Customer $customer)
     {
+        $this->authorize('viewAny', $customer);
+
         $addresses = $this->addressService->list($customer);
 
         return AddressResource::collection($addresses);
@@ -40,6 +42,8 @@ class AddressController extends Controller
 
     public function store(StoreAddressRequest $request, Customer $customer): AddressResource
     {
+        $this->authorize('create', $customer);
+
         $address = $this->addressService->create(
             $customer,
             CreateAddressDTO::fromRequest($request),
@@ -51,6 +55,7 @@ class AddressController extends Controller
     public function update(UpdateAddressRequest $request, Customer $customer, Address $address): AddressResource
     {
         $this->authorize('update', $address);
+
         $updatedAddress = $this->addressService->update($address,
             UpdateAddressDTO::fromRequest($request),
         );
@@ -61,6 +66,7 @@ class AddressController extends Controller
     public function destroy(Customer $customer, Address $address): Response
     {
         $this->authorize('delete', $address);
+
         $this->addressService->destroy(
             $address
         );

@@ -22,6 +22,8 @@ class OrderController extends Controller
 
     public function index(IndexOrderRequest $request): OrderResourceCollection
     {
+        $this->authorize('viewAny', Order::class);
+
         $orders = $this->orderService->list(
             IndexOrderDTO::fromRequest($request)
         );
@@ -40,6 +42,8 @@ class OrderController extends Controller
 
     public function store(StoreOrderRequest $request)
     {
+        $this->authorize('create', Order::class);
+
         $order = $this->orderService->create(
             CreateOrderDTO::fromRequest($request)
         );

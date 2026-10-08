@@ -18,14 +18,6 @@ class AddressService
 
     public function list(Customer $customer)
     {
-        $organizationId = $this->organizationContext->id();
-
-        if ($customer->organization_id !== $organizationId) {
-            throw ValidationException::withMessages([
-                'customer' => 'Cliente não pertence à organização atual.',
-            ]);
-        }
-
         return $customer->addresses()
             ->latest()
             ->get();
@@ -38,14 +30,6 @@ class AddressService
 
     public function create(Customer $customer, CreateAddressDTO $dto): Address
     {
-        $organizationId = $this->organizationContext->id();
-
-        if ($customer->organization_id !== $organizationId) {
-            throw ValidationException::withMessages([
-                'customer' => 'Cliente não pertence à organização atual.',
-            ]);
-        }
-
         return $customer->addresses()->create([
             'zip_code' => $dto->zipCode,
             'street' => $dto->street,

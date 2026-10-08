@@ -182,9 +182,10 @@ class OrderService
             $order->update([
                 'status' => $dto->status,
             ]);
+
+            return $order->refresh();
         });
 
-        return $order->refresh();
     }
 
     private function generateOrderNumber(): string

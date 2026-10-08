@@ -10,6 +10,7 @@ use App\Http\Requests\Api\V1\Shipment\IndexShipmentRequest;
 use App\Http\Requests\Api\V1\Shipment\StoreShipmentRequest;
 use App\Http\Requests\Api\V1\Shipment\UpdateShipmentStatusRequest;
 use App\Http\Resources\Api\V1\ShipmentResource;
+use App\Models\Shipment;
 use Illuminate\Http\Resources\Json\ResourceCollection as ShipmentResourceCollection;
 use App\Services\ShipmentService;
 
@@ -22,6 +23,8 @@ class ShipmentController extends Controller
 
     public function index(IndexShipmentRequest $request): ShipmentResourceCollection
     {
+        $this->authorize('viewAny', Shipment::class);
+
         $shipments = $this->shipmentService->list(
             IndexShipmentDTO::fromRequest($request),
         );
@@ -40,6 +43,8 @@ class ShipmentController extends Controller
 
     public function store(StoreShipmentRequest $request): ShipmentResource
     {
+        $this->authorize('create', Shipment::class);
+
         $shipment = $this->shipmentService->create(
             CreateShipmentDTO::fromRequest($request),
         );
