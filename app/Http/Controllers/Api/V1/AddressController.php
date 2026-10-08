@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Address\StoreAddressRequest;
 use App\Http\Requests\Api\V1\Address\UpdateAddressRequest;
 use App\Http\Resources\Api\V1\AddressResource;
+use App\Models\Address;
 use App\Models\Customer;
 use App\Services\AddressService;
 use Illuminate\Http\Response;
@@ -26,20 +27,19 @@ class AddressController extends Controller
         return AddressResource::collection($addresses);
     }
 
-    public function show(Customer $customer, string $address): AddressResource
+    public function show(Customer $customer, Address $address): AddressResource
     {
+        $this->authorize('view', $address);
+
         $addressModel = $this->addressService->show(
-            $customer,
             $address,
         );
 
         return new AddressResource($addressModel);
     }
 
-    public function store(
-        StoreAddressRequest $request,
-        Customer $customer,
-    ): AddressResource {
+    public function store(StoreAddressRequest $request, Customer $customer): AddressResource
+    {
         $address = $this->addressService->create(
             $customer,
             CreateAddressDTO::fromRequest($request),
@@ -48,21 +48,21 @@ class AddressController extends Controller
         return new AddressResource($address);
     }
 
-    public function update(UpdateAddressRequest $request, Customer $customer, string $address): AddressResource
+    public function update(UpdateAddressRequest $request, Customer $customer, Address $address): AddressResource
     {
-        $updatedAddress = $this->addressService->update(
-            $customer,
-            $address,
+        $this->authorize('update', $address);
+        $updatedAddress = $this->addressService->update($address,
             UpdateAddressDTO::fromRequest($request),
         );
 
         return new AddressResource($updatedAddress);
     }
 
-    public function destroy(Customer $customer,string $address): Response {
+    public function destroy(Customer $customer, Address $address): Response
+    {
+        $this->authorize('delete', $address);
         $this->addressService->destroy(
-            $customer,
-            $address,
+            $address
         );
 
         return response()->noContent();

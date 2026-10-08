@@ -31,33 +31,13 @@ class AddressService
             ->get();
     }
 
-    public function show(Customer $customer, string $addressId,): Address
+    public function show(Address $address): Address
     {
-        $organizationId = $this->organizationContext->id();
-
-        if ($customer->organization_id !== $organizationId) {
-            throw ValidationException::withMessages([
-                'customer' => 'Cliente não pertence à organização atual.',
-            ]);
-        }
-
-        $address = $customer->addresses()
-            ->whereKey($addressId)
-            ->first();
-
-        if (!$address) {
-            throw ValidationException::withMessages([
-                'address' => 'Endereço não encontrado.',
-            ]);
-        }
-
         return $address;
     }
 
-    public function create(
-        Customer $customer,
-        CreateAddressDTO $dto,
-    ): Address {
+    public function create(Customer $customer, CreateAddressDTO $dto): Address
+    {
         $organizationId = $this->organizationContext->id();
 
         if ($customer->organization_id !== $organizationId) {
@@ -77,26 +57,8 @@ class AddressService
         ]);
     }
 
-    public function update(Customer $customer, string $addressId, UpdateAddressDTO $dto): Address
+    public function update(Address $address, UpdateAddressDTO $dto): Address
     {
-        $organizationId = $this->organizationContext->id();
-
-        if ($customer->organization_id !== $organizationId) {
-            throw ValidationException::withMessages([
-                'customer' => 'Cliente não pertence à organização atual.',
-            ]);
-        }
-
-        $address = $customer->addresses()
-            ->whereKey($addressId)
-            ->first();
-
-        if (!$address) {
-            throw ValidationException::withMessages([
-                'address' => 'Endereço não encontrado.',
-            ]);
-        }
-
         $address->update([
             'zip_code' => $dto->zipCode,
             'street' => $dto->street,
@@ -110,26 +72,8 @@ class AddressService
         return $address->refresh();
     }
 
-    public function destroy(Customer $customer, string $addressId): void
+    public function destroy(Address $address): void
     {
-        $organizationId = $this->organizationContext->id();
-
-        if ($customer->organization_id !== $organizationId) {
-            throw ValidationException::withMessages([
-                'customer' => 'Cliente não pertence à organização atual.',
-            ]);
-        }
-
-        $address = $customer->addresses()
-            ->whereKey($addressId)
-            ->first();
-
-        if (!$address) {
-            throw ValidationException::withMessages([
-                'address' => 'Endereço não encontrado.',
-            ]);
-        }
-
         $address->delete();
     }
 }
