@@ -17,16 +17,22 @@ Route::prefix('v1')->group(function () {
         Route::post('auth/logout', [AuthController::class, 'logout']);
 
         Route::get('customers', [CustomerController::class, 'index']);
-        Route::get('customers/{customerId}', [CustomerController::class, 'show']);
+        Route::get('customers/{customer}', [CustomerController::class, 'show']);
         Route::post('customers', [CustomerController::class, 'store']);
-        Route::put('customers/{customerId}', [CustomerController::class, 'update']);
-        Route::delete('customers/{customerId}', [CustomerController::class, 'destroy']);
+        Route::put('customers/{customer}', [CustomerController::class, 'update']);
+        Route::delete('customers/{customer}', [CustomerController::class, 'destroy']);
 
         Route::get('/customers/{customer}/addresses', [AddressController::class, 'index']);
-        Route::get('/customers/{customer}/addresses/{address}', [AddressController::class, 'show']);
         Route::post('/customers/{customer}/addresses', [AddressController::class, 'store']);
-        Route::put('/customers/{customer}/addresses/{address}',[AddressController::class, 'update']);
-        Route::delete('/customers/{customer}/addresses/{address}', [AddressController::class, 'destroy']);
+
+        Route::scopeBindings()->group(function () {
+            Route::get(
+                '/customers/{customer}/addresses/{address}',
+                [AddressController::class, 'show']
+            );
+            Route::put('/customers/{customer}/addresses/{address}',[AddressController::class, 'update']);
+            Route::delete('/customers/{customer}/addresses/{address}', [AddressController::class, 'destroy']);
+        });
 
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
