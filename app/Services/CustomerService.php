@@ -26,18 +26,8 @@ class CustomerService
             ->paginate(15);
     }
 
-    public function show(string $customerId): Customer
+    public function show(Customer $customer): Customer
     {
-        $customer = Customer::query()
-            ->where('organization_id', $this->organizationContext->id())
-            ->find($customerId);
-
-        if (!$customer) {
-            throw ValidationException::withMessages([
-                'customer' => 'Cliente nao encontrado.',
-            ]);
-        }
-
         return $customer;
     }
 
@@ -52,15 +42,8 @@ class CustomerService
         ]);
     }
 
-    public function update(string $customerId, UpdateCustomerDTO $dto): Customer
+    public function update(Customer $customer, UpdateCustomerDTO $dto): Customer
     {
-        $customer = Customer::query()
-            ->where(
-                'organization_id',
-                $this->organizationContext->id()
-            )
-            ->findOrFail($customerId);
-
         $customer->update([
             'name' => $dto->name,
             'document' => $dto->document,
@@ -71,15 +54,8 @@ class CustomerService
         return $customer->refresh();
     }
 
-    public function delete(string $customerId): void
+    public function delete(Customer $customer): void
     {
-        $customer = Customer::query()
-            ->where(
-                'organization_id',
-                $this->organizationContext->id()
-            )
-            ->findOrFail($customerId);
-
         $customer->delete();
     }
 

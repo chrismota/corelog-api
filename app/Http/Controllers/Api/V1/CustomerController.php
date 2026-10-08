@@ -8,8 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Customer\StoreCustomerRequest;
 use App\Http\Requests\Api\V1\Customer\UpdateCustomerRequest;
 use App\Http\Resources\Api\V1\CustomerResource;
+use App\Models\Customer;
 use App\Services\CustomerService;
-use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
@@ -17,16 +17,17 @@ class CustomerController extends Controller
         private CustomerService $customerService
     ) {}
 
-    public function index(Request $request)
+    public function index()
     {
         return CustomerResource::collection(
             $this->customerService->index()
         );
     }
 
-    public function show(string $customerId)
+    public function show(Customer $customer): CustomerResource
     {
-        $customer = $this->customerService->show($customerId);
+        $this->authorize('view', $customer);
+
         return new CustomerResource($customer);
     }
 
@@ -39,19 +40,21 @@ class CustomerController extends Controller
         return new CustomerResource($customer);
     }
 
-    public function update(UpdateCustomerRequest $request, string $customerId)
+    public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-        $customer = $this->customerService->update($customerId, UpdateCustomerDTO::fromRequest($request));
+        $this->authorize('update', $customer);
+
+        $customer = $this->customerService->update($customer, UpdateCustomerDTO::fromRequest($request));
 
         return new CustomerResource($customer);
     }
 
-    public function destroy(string $customerId)
+    public function destroy(Customer $customer)
     {
-        $this->customerService->delete($customerId);
+        $this->authorize('delete', $customer);
 
-        return response()->json([
-            'message' => 'Customer deleted successfully'
-        ]);
+        $this->customerService->delete($customer);
+
+        return response()->noContent();
     }
 }
