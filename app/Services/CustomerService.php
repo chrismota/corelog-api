@@ -8,12 +8,12 @@ use App\DTOs\Customer\IndexCustomerDTO;
 use App\DTOs\Customer\UpdateCustomerDTO;
 use App\Models\Customer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Validation\ValidationException;
 
 class CustomerService
 {
     public function __construct(
-        private OrganizationContext $organizationContext
+        private OrganizationContext $organizationContext,
+        private OrganizationAccessService $organizationAccessService
     ) {}
 
     public function index(IndexCustomerDTO $dto): LengthAwarePaginator
@@ -47,7 +47,7 @@ class CustomerService
 
     public function show(Customer $customer): Customer
     {
-        $this->ensureCustomerBelongsToOrganization($customer);
+        $this->organizationAccessService->ensureCustomerBelongsToOrganization($customer);
 
         return $customer;
     }
@@ -65,7 +65,7 @@ class CustomerService
 
     public function update(Customer $customer, UpdateCustomerDTO $dto): Customer
     {
-        $this->ensureCustomerBelongsToOrganization($customer);
+        $this->organizationAccessService->ensureCustomerBelongsToOrganization($customer);
 
         $customer->update([
             'name' => $dto->name,
@@ -79,19 +79,7 @@ class CustomerService
 
     public function delete(Customer $customer): void
     {
-        $this->ensureCustomerBelongsToOrganization($customer);
+        $this->organizationAccessService->ensureCustomerBelongsToOrganization($customer);
         $customer->delete();
-    }
-
-    private function ensureCustomerBelongsToOrganization(Customer $customer): void
-    {
-        if (
-            $customer->organization_id !==
-            $this->organizationContext->id()
-        ) {
-            throw ValidationException::withMessages([
-                'customer' => 'Cliente não pertence à organização atual.',
-            ]);
-        }
     }
 }
