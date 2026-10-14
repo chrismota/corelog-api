@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\DTOs\Customer\CreateCustomerDTO;
+use App\DTOs\Customer\IndexCustomerDTO;
 use App\DTOs\Customer\UpdateCustomerDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Customer\IndexCustomerRequest;
 use App\Http\Requests\Api\V1\Customer\StoreCustomerRequest;
 use App\Http\Requests\Api\V1\Customer\UpdateCustomerRequest;
 use App\Http\Resources\Api\V1\CustomerResource;
@@ -17,13 +19,15 @@ class CustomerController extends Controller
         private CustomerService $customerService
     ) {}
 
-    public function index()
+    public function index(IndexCustomerRequest $request)
     {
         $this->authorize('viewAny', Customer::class);
 
-        return CustomerResource::collection(
-            $this->customerService->index()
+        $customers = $this->customerService->index(
+            IndexCustomerDTO::fromRequest($request)
         );
+
+        return CustomerResource::collection($customers);
     }
 
     public function show(Customer $customer): CustomerResource

@@ -55,7 +55,8 @@ class OrderService
 
         return $query
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
     }
 
     public function show(Order $order): Order

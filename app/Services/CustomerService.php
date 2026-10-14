@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contexts\OrganizationContext;
 use App\DTOs\Customer\CreateCustomerDTO;
+use App\DTOs\Customer\IndexCustomerDTO;
 use App\DTOs\Customer\UpdateCustomerDTO;
 use App\Models\Customer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -15,15 +16,33 @@ class CustomerService
         private OrganizationContext $organizationContext
     ) {}
 
-    public function index(): LengthAwarePaginator
+    public function index(IndexCustomerDTO $dto): LengthAwarePaginator
     {
-        return Customer::query()
-            ->where(
-                'organization_id',
-                $this->organizationContext->id()
-            )
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $organizationId = $this->organizationContext->id();
+
+        $query = Customer::query()
+            ->where('organization_id', $organizationId);
+
+        if ($dto->name !== null) {
+            $query->where('name', 'ilike', "%{$dto->name}%");
+        }
+
+        if ($dto->document !== null) {
+            $query->where('document', 'ilike', "%{$dto->document}%");
+        }
+
+        if ($dto->email !== null) {
+            $query->where('email', 'ilike', "%{$dto->email}%");
+        }
+
+        if ($dto->phone !== null) {
+            $query->where('phone', 'ilike', "%{$dto->phone}%");
+        }
+
+        return $query
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
     }
 
     public function show(Customer $customer): Customer
