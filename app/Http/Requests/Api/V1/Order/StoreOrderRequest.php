@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api\V1\Order;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -17,13 +18,15 @@ class StoreOrderRequest extends FormRequest
             'customer_id' => [
                 'required',
                 'uuid',
-                'exists:customers,id',
+                Rule::exists('customers', 'id')
+                    ->where('organization_id', $this->user()->organization_id),
             ],
 
             'address_id' => [
                 'required',
                 'uuid',
-                'exists:addresses,id',
+                Rule::exists('addresses', 'id')
+                    ->where('customer_id', $this->input('customer_id')),
             ],
 
             'items' => [

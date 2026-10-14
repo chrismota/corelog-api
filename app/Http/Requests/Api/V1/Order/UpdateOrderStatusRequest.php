@@ -4,7 +4,7 @@ namespace App\Http\Requests\Api\V1\Order;
 
 use App\Enums\OrderStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 
 class UpdateOrderStatusRequest extends FormRequest
 {
@@ -18,7 +18,7 @@ class UpdateOrderStatusRequest extends FormRequest
         return [
             'status' => [
                 'required',
-                new Enum(OrderStatus::class),
+                Rule::Enum(OrderStatus::class),
             ],
         ];
     }
