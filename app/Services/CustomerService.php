@@ -28,6 +28,8 @@ class CustomerService
 
     public function show(Customer $customer): Customer
     {
+        $this->ensureCustomerBelongsToOrganization($customer);
+
         return $customer;
     }
 
@@ -44,6 +46,8 @@ class CustomerService
 
     public function update(Customer $customer, UpdateCustomerDTO $dto): Customer
     {
+        $this->ensureCustomerBelongsToOrganization($customer);
+
         $customer->update([
             'name' => $dto->name,
             'document' => $dto->document,
@@ -56,7 +60,19 @@ class CustomerService
 
     public function delete(Customer $customer): void
     {
+        $this->ensureCustomerBelongsToOrganization($customer);
         $customer->delete();
     }
 
+    private function ensureCustomerBelongsToOrganization(Customer $customer): void
+    {
+        if (
+            $customer->organization_id !==
+            $this->organizationContext->id()
+        ) {
+            throw ValidationException::withMessages([
+                'customer' => 'Cliente não pertence à organização atual.',
+            ]);
+        }
+    }
 }
