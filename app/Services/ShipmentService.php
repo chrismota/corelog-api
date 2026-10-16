@@ -69,7 +69,8 @@ class ShipmentService
 
         return $query
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
     }
 
     public function show(Shipment $shipment): Shipment
@@ -144,6 +145,16 @@ class ShipmentService
     public function updateStatus(Shipment $shipment, UpdateShipmentStatusDTO $dto): Shipment
     {
         return DB::transaction(function () use ($shipment, $dto) {
+            $organizationId = $this->organizationContext->id();
+
+            $shipment = Shipment::query()
+                ->whereKey($shipment->id)
+                ->whereHas('order', function ($query) use ($organizationId) {
+                    $query->where('organization_id', $organizationId);
+                })
+                ->lockForUpdate()
+                ->firstOrFail();
+
             if (!$shipment->status->canTransitionTo($dto->status)) {
                 throw ValidationException::withMessages([
                     'status' => 'Não é possível alterar a remessa de '
