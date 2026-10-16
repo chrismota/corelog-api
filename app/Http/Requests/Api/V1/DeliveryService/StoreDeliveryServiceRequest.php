@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api\V1\DeliveryService;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreDeliveryServiceRequest extends FormRequest
 {
@@ -23,6 +24,8 @@ class StoreDeliveryServiceRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
+                'uppercase',
+                Rule::unique('delivery_services', 'code'),
             ],
             'active' => [
                 'sometimes',
