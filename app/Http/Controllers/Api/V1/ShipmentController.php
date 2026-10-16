@@ -11,8 +11,8 @@ use App\Http\Requests\Api\V1\Shipment\StoreShipmentRequest;
 use App\Http\Requests\Api\V1\Shipment\UpdateShipmentStatusRequest;
 use App\Http\Resources\Api\V1\ShipmentResource;
 use App\Models\Shipment;
-use Illuminate\Http\Resources\Json\ResourceCollection as ShipmentResourceCollection;
 use App\Services\ShipmentService;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ShipmentController extends Controller
 {
@@ -21,7 +21,7 @@ class ShipmentController extends Controller
     ) {
     }
 
-    public function index(IndexShipmentRequest $request): ShipmentResourceCollection
+    public function index(IndexShipmentRequest $request): AnonymousResourceCollection
     {
         $this->authorize('viewAny', Shipment::class);
 
