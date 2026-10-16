@@ -20,7 +20,7 @@ class UpdateDeliveryServiceDTO
 
         return new self(
             name: $data['name'],
-            code: $data['code'],
+            code: strtoupper($data['code']),
             active: (bool) $data['active'],
         );
     }

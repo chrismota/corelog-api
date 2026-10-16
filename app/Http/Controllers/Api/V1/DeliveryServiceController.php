@@ -31,9 +31,13 @@ class DeliveryServiceController extends Controller
         return DeliveryServiceResource::collection($deliveryServices);
     }
 
-    public function show(DeliveryService $deliveryService): DeliveryService
+    public function show(DeliveryService $deliveryService): DeliveryServiceResource
     {
-        return $this->deliveryServiceService->show($deliveryService);
+        $deliveryService = $this->deliveryServiceService->show(
+            $deliveryService,
+        );
+
+        return new DeliveryServiceResource($deliveryService);
     }
 
     public function store(StoreDeliveryServiceRequest $request): DeliveryServiceResource
