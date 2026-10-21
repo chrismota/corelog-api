@@ -33,6 +33,7 @@ class UpdateShipmentStatusRequest extends FormRequest
             'occurred_at' => [
                 'nullable',
                 'date',
+                'before_or_equal:now',
             ],
         ];
     }

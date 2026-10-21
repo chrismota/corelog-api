@@ -40,6 +40,7 @@ class IndexShipmentRequest extends FormRequest
             'shipped_from' => [
                 'sometimes',
                 'date',
+                'before_or_equal:shipped_to',
             ],
 
             'shipped_to' => [
@@ -51,6 +52,7 @@ class IndexShipmentRequest extends FormRequest
             'delivered_from' => [
                 'sometimes',
                 'date',
+                'before_or_equal:delivered_to',
             ],
 
             'delivered_to' => [

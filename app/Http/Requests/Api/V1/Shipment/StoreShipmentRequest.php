@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api\V1\Shipment;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreShipmentRequest extends FormRequest
 {
@@ -17,7 +18,8 @@ class StoreShipmentRequest extends FormRequest
             'order_id' => [
                 'required',
                 'uuid',
-                'exists:orders,id',
+                Rule::exists('orders', 'id')
+                    ->where('organization_id', $this->user()->organization_id),
             ],
             'delivery_service_id' => [
                 'required',
