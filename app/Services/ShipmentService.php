@@ -186,15 +186,16 @@ class ShipmentService
                 'occurred_at' => $dto->occurredAt ?? $now,
             ]);
 
-            if ($dto->status === ShipmentStatus::POSTED) {
-                $shipment->order->update([
-                    'status' => OrderStatus::SHIPPED,
-                ]);
-            }
+            $orderStatus = match ($dto->status) {
+                ShipmentStatus::POSTED => OrderStatus::SHIPPED,
+                ShipmentStatus::DELIVERED => OrderStatus::COMPLETED,
+                ShipmentStatus::CANCELLED => OrderStatus::CANCELLED,
+                default => null,
+            };
 
-            if ($dto->status === ShipmentStatus::DELIVERED) {
+            if ($orderStatus !== null) {
                 $shipment->order->update([
-                    'status' => OrderStatus::COMPLETED,
+                    'status' => $orderStatus,
                 ]);
             }
 
