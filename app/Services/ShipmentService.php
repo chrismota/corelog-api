@@ -157,11 +157,10 @@ class ShipmentService
 
             if (!$shipment->status->canTransitionTo($dto->status)) {
                 throw ValidationException::withMessages([
-                    'status' => 'Não é possível alterar a remessa de '
-                        . $shipment->status->value
-                        . ' para '
-                        . $dto->status->value
-                        . '.',
+                    'status' => [
+                        "Não é possível alterar o status da remessa de "
+                        . "{$shipment->status->value} para {$dto->status->value}.",
+                    ],
                 ]);
             }
 

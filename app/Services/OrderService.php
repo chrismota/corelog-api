@@ -172,11 +172,10 @@ class OrderService
 
             if (!$order->status->canTransitionTo($dto->status)) {
                 throw ValidationException::withMessages([
-                    'status' => 'Não é possível alterar o pedido de '
-                        . $order->status->value
-                        . ' para '
-                        . $dto->status->value
-                        . '.',
+                    'status' => [
+                        "Não é possível alterar o status da remessa de "
+                        . "{$order->status->value} para {$dto->status->value}.",
+                    ],
                 ]);
             }
 
