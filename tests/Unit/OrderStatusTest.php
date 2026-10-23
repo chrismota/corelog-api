@@ -9,20 +9,16 @@ use PHPUnit\Framework\TestCase;
 class OrderStatusTest extends TestCase
 {
     #[DataProvider('allowedTransitions')]
-    public function test_it_allows_valid_transitions(
-        OrderStatus $current,
-        OrderStatus $next,
-    ): void {
+    public function test_it_allows_valid_transitions(OrderStatus $current, OrderStatus $next): void
+    {
         $this->assertTrue(
             $current->canTransitionTo($next)
         );
     }
 
     #[DataProvider('forbiddenTransitions')]
-    public function test_it_rejects_invalid_transitions(
-        OrderStatus $current,
-        OrderStatus $next,
-    ): void {
+    public function test_it_rejects_invalid_transitions(OrderStatus $current, OrderStatus $next): void
+    {
         $this->assertFalse(
             $current->canTransitionTo($next)
         );
