@@ -8,7 +8,7 @@ return new class extends Migration
     public function up(): void
     {
         DB::statement("
-            CREATE SEQUENCE order_number_seq
+            CREATE SEQUENCE IF NOT EXISTS order_number_seq
             START WITH 1
             INCREMENT BY 1
             NO MINVALUE
