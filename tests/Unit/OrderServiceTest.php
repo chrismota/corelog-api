@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Contexts\OrganizationContext;
 use App\DTOs\Order\CreateOrderDTO;
 use App\DTOs\Order\CreateOrderItemDTO;
+use App\DTOs\Order\IndexOrderDTO;
 use App\DTOs\Order\UpdateOrderStatusDTO;
 use App\Enums\OrderStatus;
 use App\Models\Address;
@@ -476,4 +477,279 @@ class OrderServiceTest extends TestCase
         ]);
     }
 
+    public function test_it_lists_orders_from_current_organization(): void
+    {
+        $organization = Organization::factory()->create();
+
+        app(OrganizationContext::class)->set($organization);
+
+        $customer = Customer::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
+
+        Order::factory()
+            ->count(3)
+            ->create([
+                'organization_id' => $organization->id,
+                'customer_id' => $customer->id,
+            ]);
+
+        $dto = new IndexOrderDTO(
+            status: null,
+            orderNumber: null,
+            customerId: null,
+            dateFrom: null,
+            dateTo: null,
+        );
+
+        $result = app(OrderService::class)->list($dto);
+
+        $this->assertCount(3, $result->items());
+        $this->assertSame(15, $result->perPage());
+
+        $this->assertTrue(
+            collect($result->items())->every(
+                fn (Order $order) =>
+                    $order->organization_id === $organization->id
+            )
+        );
+
+        $this->assertTrue(collect($result->items())->every(
+            fn (Order $order) =>
+                $order->relationLoaded('customer')
+                && $order->relationLoaded('items')
+        ));
+    }
+
+    public function test_it_does_not_list_orders_from_other_organizations(): void
+    {
+        $organizationA = Organization::factory()->create();
+        $organizationB = Organization::factory()->create();
+
+        app(OrganizationContext::class)->set($organizationA);
+
+        $customerA = Customer::factory()->create([
+            'organization_id' => $organizationA->id,
+        ]);
+
+        $customerB = Customer::factory()->create([
+            'organization_id' => $organizationB->id,
+        ]);
+
+        Order::factory()->count(2)->create([
+            'organization_id' => $organizationA->id,
+            'customer_id' => $customerA->id,
+        ]);
+
+        Order::factory()->count(3)->create([
+            'organization_id' => $organizationB->id,
+            'customer_id' => $customerB->id,
+        ]);
+
+        $dto = new IndexOrderDTO(
+            status: null,
+            orderNumber: null,
+            customerId: null,
+            dateFrom: null,
+            dateTo: null,
+        );
+
+        $result = app(OrderService::class)->list($dto);
+
+        $this->assertCount(2, $result->items());
+
+        $this->assertSame(
+            2,
+            $result->total(),
+        );
+
+        $this->assertTrue(collect($result->items())->every(
+            fn (Order $order) =>
+                $order->organization_id === $organizationA->id
+        ));
+    }
+
+    public function test_it_filters_orders_by_status(): void
+    {
+        $organization = Organization::factory()->create();
+
+        app(OrganizationContext::class)->set($organization);
+
+        $customer = Customer::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
+
+        Order::factory()->count(2)->create([
+            'organization_id' => $organization->id,
+            'customer_id' => $customer->id,
+            'status' => OrderStatus::PENDING,
+        ]);
+
+        Order::factory()->create([
+            'organization_id' => $organization->id,
+            'customer_id' => $customer->id,
+            'status' => OrderStatus::PROCESSING,
+        ]);
+
+        $dto = new IndexOrderDTO(
+            status: OrderStatus::PENDING,
+            orderNumber: null,
+            customerId: null,
+            dateFrom: null,
+            dateTo: null,
+        );
+
+        $result = app(OrderService::class)->list($dto);
+
+        $this->assertCount(2, $result->items());
+
+        $this->assertTrue(collect($result->items())->every(
+            fn (Order $order) =>
+                $order->status === OrderStatus::PENDING
+        ));
+    }
+
+    public function test_it_filters_orders_by_order_number(): void
+    {
+        $organization = Organization::factory()->create();
+        app(OrganizationContext::class)->set($organization);
+
+        $customer = Customer::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
+
+        Order::factory()->create([
+            'organization_id' => $organization->id,
+            'customer_id' => $customer->id,
+            'order_number' => '2026000001',
+        ]);
+
+        Order::factory()->create([
+            'organization_id' => $organization->id,
+            'customer_id' => $customer->id,
+            'order_number' => '2026000002',
+        ]);
+
+        $dto = new IndexOrderDTO(
+            status: null,
+            orderNumber: '2026000001',
+            customerId: null,
+            dateFrom: null,
+            dateTo: null,
+        );
+
+        $result = app(OrderService::class)->list($dto);
+
+        $this->assertCount(1, $result->items());
+        $this->assertSame('2026000001', $result->items()[0]->order_number);
+    }
+
+    public function test_it_filters_orders_by_customer(): void
+    {
+        $organization = Organization::factory()->create();
+        app(OrganizationContext::class)->set($organization);
+
+        $customerA = Customer::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
+
+        $customerB = Customer::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
+
+        Order::factory()->count(2)->create([
+            'organization_id' => $organization->id,
+            'customer_id' => $customerA->id,
+        ]);
+
+        Order::factory()->create([
+            'organization_id' => $organization->id,
+            'customer_id' => $customerB->id,
+        ]);
+
+        $dto = new IndexOrderDTO(
+            status: null,
+            orderNumber: null,
+            customerId: $customerA->id,
+            dateFrom: null,
+            dateTo: null,
+        );
+
+        $result = app(OrderService::class)->list($dto);
+
+        $this->assertCount(2, $result->items());
+
+        $this->assertTrue(
+            collect($result->items())->every(
+                fn (Order $order) => $order->customer_id === $customerA->id
+            )
+        );
+    }
+
+    public function test_it_filters_orders_by_date_range(): void
+    {
+        $organization = Organization::factory()->create();
+        app(OrganizationContext::class)->set($organization);
+
+        $customer = Customer::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
+
+        $createOrder = fn (string $date) => Order::factory()->create([
+            'organization_id' => $organization->id,
+            'customer_id' => $customer->id,
+            'created_at' => $date,
+            'updated_at' => $date,
+        ]);
+
+        $createOrder('2026-01-09 12:00:00');
+        $createOrder('2026-01-15 12:00:00');
+        $createOrder('2026-01-21 12:00:00');
+
+        $dto = new IndexOrderDTO(
+            status: null,
+            orderNumber: null,
+            customerId: null,
+            dateFrom: '2026-01-10 00:00:00',
+            dateTo: '2026-01-20 23:59:59',
+        );
+
+        $result = app(OrderService::class)->list($dto);
+
+        $this->assertCount(1, $result->items());
+        $this->assertSame(
+            '2026-01-15 12:00:00',
+            $result->items()[0]->created_at->format('Y-m-d H:i:s'),
+        );
+    }
+
+    public function test_it_paginates_orders_fifteen_per_page(): void
+    {
+        $organization = Organization::factory()->create();
+        app(OrganizationContext::class)->set($organization);
+
+        $customer = Customer::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
+
+        Order::factory()->count(17)->create([
+            'organization_id' => $organization->id,
+            'customer_id' => $customer->id,
+        ]);
+
+        $dto = new IndexOrderDTO(
+            status: null,
+            orderNumber: null,
+            customerId: null,
+            dateFrom: null,
+            dateTo: null,
+        );
+
+        $result = app(OrderService::class)->list($dto);
+
+        $this->assertCount(15, $result->items());
+        $this->assertSame(17, $result->total());
+        $this->assertSame(15, $result->perPage());
+        $this->assertSame(1, $result->currentPage());
+    }
 }
